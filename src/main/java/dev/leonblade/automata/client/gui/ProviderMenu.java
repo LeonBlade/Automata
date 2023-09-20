@@ -4,8 +4,6 @@ import dev.leonblade.automata.common.block.ModBlocks;
 import dev.leonblade.automata.common.entity.ProviderBlockEntity;
 import dev.leonblade.automata.common.inventory.GhostSlot;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
@@ -36,7 +34,12 @@ public class ProviderMenu extends AbstractContainerMenu {
 
     this.blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
       this.addSlot(new SlotItemHandler(handler, 0, 16, 16));
-      this.addSlot(new SlotItemHandler(handler, 1, 64, 16));
+      this.addSlot(new SlotItemHandler(handler, 1, 64, 16) {
+        @Override
+        public boolean mayPlace(@NotNull ItemStack stack) {
+          return false;
+        }
+      });
     });
 
     this.addSlot(new GhostSlot(this.blockEntity.getFilterHandler(), 0, 16, 38));
@@ -63,35 +66,41 @@ public class ProviderMenu extends AbstractContainerMenu {
 
   @Override
   public @NotNull ItemStack quickMoveStack(@NotNull Player playerIn, int index) {
-    var sourceSlot = slots.get(index);
-    if (!sourceSlot.hasItem()) return ItemStack.EMPTY;  //EMPTY_ITEM
-    var sourceStack = sourceSlot.getItem();
-    var copyOfSourceStack = sourceStack.copy();
-
-    // Check if the slot clicked is one of the vanilla container slots
-    if (index < VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT) {
-      // This is a vanilla container slot so merge the stack into the tile inventory
-      if (!moveItemStackTo(sourceStack, TE_INVENTORY_FIRST_SLOT_INDEX, TE_INVENTORY_FIRST_SLOT_INDEX
-        + TE_INVENTORY_SLOT_COUNT, false)) {
-        return ItemStack.EMPTY;  // EMPTY_ITEM
-      }
-    } else if (index < TE_INVENTORY_FIRST_SLOT_INDEX + TE_INVENTORY_SLOT_COUNT) {
-      // This is a TE slot so merge the stack into the players inventory
-      if (!moveItemStackTo(sourceStack, VANILLA_FIRST_SLOT_INDEX, VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT, false)) {
-        return ItemStack.EMPTY;
-      }
-    } else {
-      System.out.println("Invalid slotIndex:" + index);
+    var currentSlot = this.slots.get(index);
+    if (!currentSlot.hasItem()) {
       return ItemStack.EMPTY;
     }
-    // If stack size == 0 (the entire stack was moved) set slot contents to null
-    if (sourceStack.getCount() == 0) {
-      sourceSlot.set(ItemStack.EMPTY);
-    } else {
-      sourceSlot.setChanged();
-    }
-    sourceSlot.onTake(playerIn, sourceStack);
-    return copyOfSourceStack;
+
+    return ItemStack.EMPTY;
+    // var sourceSlot = slots.get(index);
+    // if (!sourceSlot.hasItem()) return ItemStack.EMPTY;  //EMPTY_ITEM
+    // var sourceStack = sourceSlot.getItem();
+    // var copyOfSourceStack = sourceStack.copy();
+    //
+    // // Check if the slot clicked is one of the vanilla container slots
+    // if (index < VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT) {
+    //   // This is a vanilla container slot so merge the stack into the tile inventory
+    //   if (!moveItemStackTo(sourceStack, TE_INVENTORY_FIRST_SLOT_INDEX, TE_INVENTORY_FIRST_SLOT_INDEX
+    //     + TE_INVENTORY_SLOT_COUNT, false)) {
+    //     return ItemStack.EMPTY;  // EMPTY_ITEM
+    //   }
+    // } else if (index < TE_INVENTORY_FIRST_SLOT_INDEX + TE_INVENTORY_SLOT_COUNT) {
+    //   // This is a TE slot so merge the stack into the players inventory
+    //   if (!moveItemStackTo(sourceStack, VANILLA_FIRST_SLOT_INDEX, VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT, false)) {
+    //     return ItemStack.EMPTY;
+    //   }
+    // } else {
+    //   System.out.println("Invalid slotIndex:" + index);
+    //   return ItemStack.EMPTY;
+    // }
+    // // If stack size == 0 (the entire stack was moved) set slot contents to null
+    // if (sourceStack.getCount() == 0) {
+    //   sourceSlot.set(ItemStack.EMPTY);
+    // } else {
+    //   sourceSlot.setChanged();
+    // }
+    // sourceSlot.onTake(playerIn, sourceStack);
+    // return copyOfSourceStack;
   }
 
   @Override
