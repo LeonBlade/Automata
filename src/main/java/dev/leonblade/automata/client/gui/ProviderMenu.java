@@ -1,23 +1,19 @@
 package dev.leonblade.automata.client.gui;
 
-import dev.leonblade.automata.common.block.ModBlocks;
 import dev.leonblade.automata.common.entity.ProviderBlockEntity;
 import dev.leonblade.automata.common.inventory.GhostSlot;
+import mekanism.common.inventory.slot.OutputInventorySlot;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 import org.jetbrains.annotations.NotNull;
 
-public class ProviderMenu extends AbstractContainerMenu {
-  public final ProviderBlockEntity blockEntity;
-  private final Level level;
-  protected final ContainerData data;
+public class ProviderMenu extends BaseAutomataMenu<ProviderBlockEntity> {
 
   public ProviderMenu(int id, Inventory inv, FriendlyByteBuf buf) {
     this(id, inv, inv.player.level.getBlockEntity(buf.readBlockPos()), new SimpleContainerData(1));
@@ -25,15 +21,20 @@ public class ProviderMenu extends AbstractContainerMenu {
 
   public ProviderMenu(int id, Inventory inv, BlockEntity entity, ContainerData data) {
     super(ModMenuTypes.PROVIDER_MENU.get(), id);
-    this.level = inv.player.level;
+
     this.blockEntity = (ProviderBlockEntity) entity;
+    this.level = inv.player.getLevel();
     this.data = data;
 
+    // Add the player inventory slots
     addPlayerInventory(inv);
+    // Add the player hotbar slots
     addPlayerHotbar(inv);
 
     this.blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
+      // Input slot
       this.addSlot(new SlotItemHandler(handler, 0, 16, 16));
+      // Output slot
       this.addSlot(new SlotItemHandler(handler, 1, 64, 16) {
         @Override
         public boolean mayPlace(@NotNull ItemStack stack) {
@@ -45,6 +46,8 @@ public class ProviderMenu extends AbstractContainerMenu {
     this.addSlot(new GhostSlot(this.blockEntity.getFilterHandler(), 0, 16, 38));
     this.addDataSlots(this.data);
   }
+
+  // NOTE: I'm not going to be using this, but keeping it here temporarily
 
   // CREDIT GOES TO: diesieben07 | https://github.com/diesieben07/SevenCommons
   // must assign a slot number to each of the slots used by the GUI.
@@ -67,6 +70,7 @@ public class ProviderMenu extends AbstractContainerMenu {
   @Override
   public @NotNull ItemStack quickMoveStack(@NotNull Player playerIn, int index) {
     var currentSlot = this.slots.get(index);
+    // TODO: fix this
     if (!currentSlot.hasItem()) {
       return ItemStack.EMPTY;
     }
@@ -101,39 +105,5 @@ public class ProviderMenu extends AbstractContainerMenu {
     // }
     // sourceSlot.onTake(playerIn, sourceStack);
     // return copyOfSourceStack;
-  }
-
-  @Override
-  public boolean stillValid(@NotNull Player player) {
-    return stillValid(ContainerLevelAccess.create(level, blockEntity.getBlockPos()), player, ModBlocks.PROVIDER_BLOCK.get());
-  }
-
-  private void addPlayerInventory(Inventory playerInventory) {
-    for (int i = 0; i < 3; ++i) {
-      for (int j = 0; j < 9; ++j) {
-        this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 86 + i * 18));
-      }
-    }
-  }
-
-  private void addPlayerHotbar(Inventory playerInventory) {
-    for (int i = 0; i < 9; ++i) {
-      this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 144));
-    }
-  }
-
-  @Override
-  public void clicked(int id, int dragType, @NotNull ClickType type, @NotNull Player player) {
-    var slot = id >= 0 ? this.getSlot(id) : null;
-    if (slot instanceof GhostSlot) {
-      var carried = player.containerMenu.getCarried();
-      if (carried.isEmpty()) {
-        slot.set(ItemStack.EMPTY);
-      } else if (slot.mayPlace(carried)) {
-        slot.set(carried.copy());
-      }
-      return;
-    }
-    super.clicked(id, dragType, type, player);
   }
 }

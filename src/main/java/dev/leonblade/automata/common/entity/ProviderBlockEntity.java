@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -44,6 +45,13 @@ public class ProviderBlockEntity extends BlockEntity implements MenuProvider {
     @Override
     protected void onContentsChanged(int slot) {
       setChanged();
+    }
+
+    @Override
+    public void setStackInSlot(int slot, @NotNull ItemStack stack) {
+      validateSlotIndex(slot);
+      this.stacks.set(slot, stack);
+      onContentsChanged(slot);
     }
   };
 
@@ -109,7 +117,7 @@ public class ProviderBlockEntity extends BlockEntity implements MenuProvider {
   @Override
   protected void saveAdditional(CompoundTag nbt) {
     nbt.put(INVENTORY, this.itemHandler.serializeNBT());
-    nbt.put(GHOST, this.getFilterHandler().serializeNBT());
+    nbt.put(GHOST, this.filterHandler.serializeNBT());
     nbt.putInt("count", this.count);
     super.saveAdditional(nbt);
   }
@@ -118,7 +126,7 @@ public class ProviderBlockEntity extends BlockEntity implements MenuProvider {
   public void load(@NotNull CompoundTag nbt) {
     super.load(nbt);
     this.itemHandler.deserializeNBT(nbt.getCompound(INVENTORY));
-    this.getFilterHandler().deserializeNBT(nbt.getCompound(GHOST));
+    this.filterHandler.deserializeNBT(nbt.getCompound(GHOST));
     this.data.set(0, nbt.getInt("count"));
   }
 

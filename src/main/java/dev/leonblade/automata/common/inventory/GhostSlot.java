@@ -21,13 +21,21 @@ public class GhostSlot extends SlotItemHandler {
   @Override
   public void set(@NotNull ItemStack stack) {
     if (!stack.isEmpty()) {
-      stack.setCount(1);
+      var ghost = stack.copy();
+      ghost.setCount(1);
+      super.set(ghost);
+    } else {
+      super.set(ItemStack.EMPTY);
     }
-    super.set(stack);
   }
 
   @Override
   public boolean mayPickup(Player playerIn) {
     return false;
+  }
+
+  @Override
+  public int getMaxStackSize() {
+    return 1;
   }
 }
