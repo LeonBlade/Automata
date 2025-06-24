@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import dev.leonblade.automata.common.block.ModBlocks;
 import dev.leonblade.automata.common.inventory.GhostSlot;
 import dev.leonblade.automata.util.Util;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
@@ -24,7 +23,7 @@ public abstract class BaseAutomataMenu<T extends BlockEntity> extends AbstractCo
     }
 
     @Override
-    public @NotNull ItemStack quickMoveStack(Player pPlayer, int pIndex) {
+    public @NotNull ItemStack quickMoveStack(@NotNull Player pPlayer, int pIndex) {
         return ItemStack.EMPTY;
     }
 
@@ -38,9 +37,13 @@ public abstract class BaseAutomataMenu<T extends BlockEntity> extends AbstractCo
      * @param inventory Inventory to display, typically this is the player
      */
     protected void addPlayerInventory(Inventory inventory) {
+        addPlayerInventory(inventory, 8, 84);
+    }
+
+    protected void addPlayerInventory(Inventory inventory, int startX, int startY) {
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 9; ++x) {
-                this.addSlot(new Slot(inventory, x + y * 9 + 9, 8 + x * 18, 86 + y * 18));
+                this.addSlot(new Slot(inventory, x + y * 9 + 9, startX + x * 18, startY + y * 18));
             }
         }
     }
@@ -50,8 +53,12 @@ public abstract class BaseAutomataMenu<T extends BlockEntity> extends AbstractCo
      * @param inventory Inventory to display, typically this is the player
      */
     protected void addPlayerHotbar(Inventory inventory) {
+        addPlayerHotbar(inventory, 8, 142);
+    }
+
+    protected void addPlayerHotbar(Inventory inventory, int startX, int startY) {
         for (int x = 0; x < 9; ++x) {
-            this.addSlot(new Slot(inventory, x, 8 + x * 18, 144));
+            this.addSlot(new Slot(inventory, x, startX + x * 18, startY));
         }
     }
 
@@ -60,15 +67,17 @@ public abstract class BaseAutomataMenu<T extends BlockEntity> extends AbstractCo
     public void clicked(int id, int dragType, @NotNull ClickType type, @NotNull Player player) {
         // Provide logic for handling ghost slots
         try {
-            var slot = this.getSlot(id);
-            if (slot instanceof GhostSlot) {
-                var carried = Util.copyWithCount(player.containerMenu.getCarried(), 1);
-                if (carried.isEmpty()) {
-                    slot.set(ItemStack.EMPTY);
-                } else if (slot.mayPlace(carried)) {
-                    slot.set(carried);
+            if (id != -999) {
+                var slot = this.getSlot(id);
+                if (slot instanceof GhostSlot) {
+                    var carried = Util.copyWithCount(player.containerMenu.getCarried(), 1);
+                    if (carried.isEmpty()) {
+                        slot.set(ItemStack.EMPTY);
+                    } else if (slot.mayPlace(carried)) {
+                        slot.set(carried);
+                    }
+                    return;
                 }
-                return;
             }
         } catch (IndexOutOfBoundsException e) {
             LogUtils.getLogger().error("Could not click slot with index: {}", id, e);

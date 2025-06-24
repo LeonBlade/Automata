@@ -11,10 +11,12 @@ public class ExamplePacketC2S implements IPacket {
 
   private final BlockPos blockPos;
   private final int index;
+  private final int change;
 
-  public ExamplePacketC2S(BlockPos pos, int index) {
+  public ExamplePacketC2S(BlockPos pos, int index, int change) {
     this.blockPos = pos;
     this.index = index;
+    this.change = change;
   }
 
   @Override
@@ -31,7 +33,7 @@ public class ExamplePacketC2S implements IPacket {
             providerBlockEntity.getThatShit();
             break;
           case 1:
-            providerBlockEntity.addCount();
+            providerBlockEntity.addCount(change);
             break;
         }
       });
@@ -42,10 +44,11 @@ public class ExamplePacketC2S implements IPacket {
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeBlockPos(this.blockPos);
     buffer.writeInt(this.index);
+    buffer.writeInt(this.change);
   }
 
   public static ExamplePacketC2S decode(FriendlyByteBuf buffer) {
-    return new ExamplePacketC2S(buffer.readBlockPos(), buffer.readInt());
+    return new ExamplePacketC2S(buffer.readBlockPos(), buffer.readInt(), buffer.readInt());
   }
   
 }

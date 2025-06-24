@@ -180,8 +180,8 @@ public class ProviderBlockEntity extends BlockEntity implements MenuProvider {
     setChanged();
   }
 
-  public void addCount() {
-    this.count++;
+  public void addCount(int change) {
+    this.count += change;
     setChanged();
   }
 

@@ -2,7 +2,7 @@ package dev.leonblade.automata.client.gui;
 
 import dev.leonblade.automata.common.entity.ProviderBlockEntity;
 import dev.leonblade.automata.common.inventory.GhostSlot;
-import mekanism.common.inventory.slot.OutputInventorySlot;
+import dev.leonblade.automata.common.inventory.OutputSlotHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -33,17 +33,13 @@ public class ProviderMenu extends BaseAutomataMenu<ProviderBlockEntity> {
 
     this.blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
       // Input slot
-      this.addSlot(new SlotItemHandler(handler, 0, 16, 16));
+      this.addSlot(new SlotItemHandler(handler, 0, 8, 8));
+      // Ghost slot
+      this.addSlot(new GhostSlot(this.blockEntity.getFilterHandler(), 0, 8, 30));
       // Output slot
-      this.addSlot(new SlotItemHandler(handler, 1, 64, 16) {
-        @Override
-        public boolean mayPlace(@NotNull ItemStack stack) {
-          return false;
-        }
-      });
+      this.addSlot(new OutputSlotHandler(handler, 1, 152, 8));
     });
 
-    this.addSlot(new GhostSlot(this.blockEntity.getFilterHandler(), 0, 16, 38));
     this.addDataSlots(this.data);
   }
 
