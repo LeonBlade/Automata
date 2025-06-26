@@ -16,14 +16,16 @@ import org.jetbrains.annotations.NotNull;
 public class ProviderMenu extends BaseAutomataMenu<ProviderBlockEntity> {
 
   public ProviderMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-    this(id, inv, inv.player.level.getBlockEntity(buf.readBlockPos()), new SimpleContainerData(1));
+    this(id, inv, inv.player.level().getBlockEntity(buf.readBlockPos()), new SimpleContainerData(1));
   }
 
   public ProviderMenu(int id, Inventory inv, BlockEntity entity, ContainerData data) {
     super(ModMenuTypes.PROVIDER_MENU.get(), id);
 
+    checkContainerSize(inv, 1);
+
     this.blockEntity = (ProviderBlockEntity) entity;
-    this.level = inv.player.getLevel();
+    this.level = inv.player.level();
     this.data = data;
 
     // Add the player inventory slots

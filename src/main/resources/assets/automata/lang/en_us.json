@@ -5,9 +5,9 @@
   "block.automata.test_block": "Test Block",
   "block.automata.walt_block": "Walter... Put your dick away Walter...",
 
-  "itemGroup.automata_tab": "Automata",
-
   "menu.automata.provider_block_entity": "Provider",
 
-  "entity.automata.provider.block_entity": "Provider"
+  "entity.automata.provider.block_entity": "Provider",
+
+  "creative.tab.automata_tab": "Automata"
 }

@@ -24,7 +24,7 @@ public class ExamplePacketC2S implements IPacket {
     var player = context.getSender();
     if (player != null) {
       context.enqueueWork(() -> {
-        var blockEntity = WorldUtils.getTileEntity(player.level, this.blockPos);
+        var blockEntity = WorldUtils.getTileEntity(player.level(), this.blockPos);
         if (!(blockEntity instanceof ProviderBlockEntity providerBlockEntity)) {
           return;
         }

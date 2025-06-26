@@ -1,12 +1,11 @@
 package dev.leonblade.automata.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
-
 import dev.leonblade.automata.AutomataMod;
 import dev.leonblade.automata.common.network.ModMessages;
 import dev.leonblade.automata.common.network.packet.ExamplePacketC2S;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -17,7 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 public class ProviderScreen extends AbstractContainerScreen<ProviderMenu> implements ContainerEventHandler {
-  private static final ResourceLocation GUI_TEXTURE = new ResourceLocation(AutomataMod.MOD_ID, "textures/gui/provider/provider_gui.png");
+  private static final ResourceLocation GUI_TEXTURE = ResourceLocation.fromNamespaceAndPath(AutomataMod.MOD_ID, "textures/gui/provider/provider_gui.png");
 
   public ProviderScreen(ProviderMenu menu, Inventory inventory, Component title) {
     super(menu, inventory, title);
@@ -33,18 +32,25 @@ public class ProviderScreen extends AbstractContainerScreen<ProviderMenu> implem
     var wX = (width - imageWidth) / 2;
     var wY = (height - imageHeight) / 2;
 
-    var drinkMeButton = new Button(wX + 87, wY + 6, 60, 20, Component.literal("Extract"), this::onPress);
+    var extractButton = Button.builder(Component.literal("Extract"), this::onPress)
+        .bounds(wX + 87, wY + 6, 60, 20)
+        .build();
 
-    var addButton = new Button(wX + 150, wY + 29, 20, 20, Component.literal("+"), this::onAdd);
-    var removeButton = new Button(wX + 150, wY + 50, 20, 20, Component.literal("-"), this::onRemove);
+    var addButton = Button.builder(Component.literal("+"), this::onAdd)
+        .bounds(wX + 150, wY + 29, 20, 20)
+        .build();
 
-    this.addRenderableWidget(drinkMeButton);
+    var removeButton = Button.builder(Component.literal("-"), this::onRemove)
+        .bounds(wX + 150, wY + 50, 20, 20)
+        .build();
+
+    this.addRenderableWidget(extractButton);
     this.addRenderableWidget(addButton);
     this.addRenderableWidget(removeButton);
   }
 
   private void onPress(Button button) {
-    LogUtils.getLogger().info("IM A BUTTON AND IM PRESSED");
+    LogUtils.getLogger().info("I'M A BUTTON AND IM PRESSED");
     ModMessages.sendToServer(new ExamplePacketC2S(menu.blockEntity.getBlockPos(), 0, 0));
   }
 
@@ -57,7 +63,7 @@ public class ProviderScreen extends AbstractContainerScreen<ProviderMenu> implem
   }
 
   @Override
-  protected void renderBg(@NotNull PoseStack stack, float pPartialTick, int pMouseX, int pMouseY) {
+  protected void renderBg(GuiGraphics gfx, float pPartialTick, int pMouseX, int pMouseY) {
     RenderSystem.setShader(GameRenderer::getPositionTexShader);
     RenderSystem.setShaderColor(1.f, 1.f, 1.f, 1.f);
     RenderSystem.setShaderTexture(0, GUI_TEXTURE);
@@ -65,15 +71,15 @@ public class ProviderScreen extends AbstractContainerScreen<ProviderMenu> implem
     var x = (width - imageWidth) / 2;
     var y = (height - imageHeight) / 2;
 
-    this.blit(stack, x, y, 0, 0, imageWidth, imageHeight);
+    gfx.blit(GUI_TEXTURE, x, y, 0, 0, imageWidth, imageHeight);
 
-    drawCenteredString(stack, this.getMinecraft().font, Component.literal(Integer.toString(this.menu.data.get(0))), x + 32, y + 30, 0xFFFFFF);
+    gfx.drawCenteredString(this.getMinecraft().font, Component.literal(Integer.toString(this.menu.data.get(0))), x + 32, y + 30, 0xFFFFFF);
   }
 
   @Override
-  public void render(@NotNull PoseStack stack, int mouseX, int mouseY, float delta) {
-    renderBackground(stack);
-    super.render(stack, mouseX, mouseY, delta);
-    renderTooltip(stack, mouseX, mouseY);
+  public void render(@NotNull GuiGraphics gfx, int mouseX, int mouseY, float delta) {
+    renderBackground(gfx);
+    super.render(gfx, mouseX, mouseY, delta);
+    renderTooltip(gfx, mouseX, mouseY);
   }
 }
