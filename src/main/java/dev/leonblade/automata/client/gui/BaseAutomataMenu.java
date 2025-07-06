@@ -67,7 +67,7 @@ public abstract class BaseAutomataMenu<T extends BlockEntity> extends AbstractCo
     public void clicked(int id, int dragType, @NotNull ClickType type, @NotNull Player player) {
         // Provide logic for handling ghost slots
         try {
-            if (id != -999) {
+            if (id != -1) {
                 var slot = this.getSlot(id);
                 if (slot instanceof GhostSlot) {
                     var carried = Util.copyWithCount(player.containerMenu.getCarried(), 1);

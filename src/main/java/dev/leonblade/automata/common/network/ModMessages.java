@@ -21,7 +21,7 @@ public class ModMessages {
 
   public static void register() {
     channel = NetworkRegistry.ChannelBuilder
-      .named(new ResourceLocation(AutomataMod.MOD_ID, "messages"))
+      .named(ResourceLocation.fromNamespaceAndPath(AutomataMod.MOD_ID, "messages"))
       .networkProtocolVersion(() -> "1.0")
       .clientAcceptedVersions(s -> true)
       .serverAcceptedVersions(s -> true)
